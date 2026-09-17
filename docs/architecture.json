@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "CuteNote · AI 智能笔记应用架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [720, 540],
+    "output": "docs/architecture.html"
+  },
+  "components": [
+    { "id": "browser", "type": "frontend", "label": "浏览器", "sublabel": "React 19 · Hash Router", "pos": [40, 50], "size": [150, 56], "tag": "用户侧" },
+    { "id": "express", "type": "backend", "label": "Express 服务", "sublabel": "单端口 3001 · API + 静态", "pos": [260, 50], "size": [170, 56], "tag": "入口" },
+
+    { "id": "extract", "type": "backend", "label": "内容提取", "sublabel": "Cheerio · URL/HTML/文件", "pos": [40, 170], "size": [150, 56] },
+    { "id": "ai", "type": "backend", "label": "AI 分析", "sublabel": "OpenAI 兼容 · 号池故障转移", "pos": [260, 170], "size": [170, 56], "tag": "可降级" },
+    { "id": "wiki", "type": "backend", "label": "Wiki 增强", "sublabel": "中英文百科关联", "pos": [490, 170], "size": [150, 56] },
+
+    { "id": "orchestrator", "type": "backend", "label": "流程编排", "sublabel": "analysisEngine · 串联全链路", "pos": [260, 300], "size": [170, 56], "tag": "核心" },
+    { "id": "db", "type": "database", "label": "JSON 数据", "sublabel": "data/db.json · 本地存储", "pos": [490, 300], "size": [150, 56] },
+
+    { "id": "vector", "type": "database", "label": "向量存储", "sublabel": "TF-IDF · 无需 Embedding API", "pos": [40, 430], "size": [150, 56], "tag": "零依赖" },
+    { "id": "graph", "type": "backend", "label": "知识图谱", "sublabel": "实体/关系提取 · SVG 可视化", "pos": [260, 430], "size": [170, 56] },
+    { "id": "drawio", "type": "backend", "label": "Drawio 生成", "sublabel": "4 种图表 · 可下载 .drawio", "pos": [490, 430], "size": [150, 56] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "前端层", "wraps": ["browser"] },
+    { "kind": "security-group", "label": "Express 单服务", "wraps": ["express", "extract", "ai", "wiki", "orchestrator", "db", "vector", "graph", "drawio"] }
+  ],
+  "connections": [
+    { "id": "browser-express", "from": "browser", "to": "express", "label": "HTTP REST", "variant": "emphasis" },
+    { "id": "express-extract", "from": "express", "to": "extract", "variant": "emphasis" },
+    { "id": "extract-ai", "from": "extract", "to": "ai", "label": "正文", "variant": "emphasis", "labelDy": 24 },
+    { "id": "ai-wiki", "from": "ai", "to": "wiki", "variant": "dashed" },
+    { "id": "ai-orchestrator", "from": "ai", "to": "orchestrator", "variant": "emphasis" },
+    { "id": "wiki-orchestrator", "from": "wiki", "to": "orchestrator", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "orchestrator-vector", "from": "orchestrator", "to": "vector", "label": "索引/检索", "variant": "emphasis" },
+    { "id": "orchestrator-graph", "from": "orchestrator", "to": "graph", "variant": "emphasis" },
+    { "id": "orchestrator-drawio", "from": "orchestrator", "to": "drawio", "variant": "dashed" },
+    { "id": "orchestrator-db", "from": "orchestrator", "to": "db", "label": "存取笔记", "variant": "emphasis" }
+  ]
+}
